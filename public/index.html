@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexusAdmin | Manager</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="brand">
+                <i class="ri-robot-2-fill logo-icon"></i>
+                <div><h1>NEXUS</h1><span>Admin Panel</span></div>
+            </div>
+
+            <nav class="main-nav">
+                <button class="nav-item active" onclick="switchView('dashboard')">
+                    <i class="ri-dashboard-line"></i> Dashboard
+                </button>
+                <button class="nav-item" onclick="switchView('products')">
+                    <i class="ri-shopping-bag-3-line"></i> Products & Stock
+                </button>
+            </nav>
+
+            <div class="menu-label">SYSTEM</div>
+            <div class="status-card">
+                <div class="status-item">
+                    <span>DB Status</span><span id="db-status-text" class="mono-text">...</span>
+                </div>
+                <div class="status-item">
+                    <span>Uptime</span><span id="server-uptime" class="mono-text">00h 00m</span>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            
+            <div id="view-dashboard" class="view-section active">
+                <header class="stats-overview">
+                    <div class="stat-card purple">
+                        <div class="icon-box"><i class="ri-user-line"></i></div>
+                        <div><span>Total Users</span><h2 id="total-users">0</h2></div>
+                    </div>
+                    <div class="stat-card blue">
+                        <div class="icon-box"><i class="ri-box-3-line"></i></div>
+                        <div><span>Total Products</span><h2 id="total-products">0</h2></div>
+                    </div>
+                    <div class="stat-card green">
+                        <div class="icon-box"><i class="ri-money-dollar-circle-line"></i></div>
+                        <div><span>Success Trx</span><h2 id="success-transactions">0</h2></div>
+                    </div>
+                    <div class="stat-card orange">
+                        <div class="icon-box"><i class="ri-loader-4-line"></i></div>
+                        <div><span>Pending Trx</span><h2 id="pending-transactions">0</h2></div>
+                    </div>
+                </header>
+
+                <div class="panel terminal-panel" style="margin-top: 25px;">
+                    <div class="terminal-header">
+                        <div class="terminal-title">
+                            <i class="ri-terminal-line"></i> Heroku Logs
+                            <span class="live-badge">LIVE</span>
+                        </div>
+                    </div>
+                    <div class="terminal-body">
+                        <pre id="heroku-logs" class="log-content">Connecting to log stream...</pre>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-products" class="view-section" style="display: none;">
+                <div class="panel">
+                    <div class="panel-header flex-between">
+                        <h3>Product Management</h3>
+                        <button class="btn-primary" onclick="openModal('modal-product')">
+                            <i class="ri-add-line"></i> Add Product
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="cyber-table">
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Name</th>
+                                    <th>Price</th>
+                                    <th>Stock</th>
+                                    <th style="text-align:right;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="product-table-body">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <div id="modal-product" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 id="modal-title">Add Product</h3>
+                <button class="close-btn" onclick="closeModal('modal-product')"><i class="ri-close-line"></i></button>
+            </div>
+            <form id="product-form" onsubmit="handleProductSubmit(event)">
+                <input type="hidden" id="prod-id">
+                <div class="form-group">
+                    <label>Category</label>
+                    <input type="text" id="prod-cat" placeholder="e.g. PREMIUM APPS" required>
+                </div>
+                <div class="form-group">
+                    <label>Product Name</label>
+                    <input type="text" id="prod-name" placeholder="e.g. Netflix 1 Month" required>
+                </div>
+                <div class="form-group">
+                    <label>Price (Rp)</label>
+                    <input type="number" id="prod-price" placeholder="25000" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="prod-desc" rows="2" placeholder="Short description..."></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" onclick="closeModal('modal-product')">Cancel</button>
+                    <button type="submit" class="btn-primary">Save Product</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-stock" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3>Manage Stock</h3>
+                <button class="close-btn" onclick="closeModal('modal-stock')"><i class="ri-close-line"></i></button>
+            </div>
+            <form id="stock-form" onsubmit="handleStockSubmit(event)">
+                <input type="hidden" id="stock-prod-id">
+                <div class="form-group">
+                    <label>Product: <span id="stock-prod-name" class="text-accent"></span></label>
+                </div>
+                <div class="form-group">
+                    <label>Add Stock Data (One per line)</label>
+                    <textarea id="stock-data" rows="8" placeholder="email:pass&#10;key123&#10;token_abc" required class="code-input"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" onclick="closeModal('modal-stock')">Cancel</button>
+                    <button type="submit" class="btn-success">Add Stock</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
